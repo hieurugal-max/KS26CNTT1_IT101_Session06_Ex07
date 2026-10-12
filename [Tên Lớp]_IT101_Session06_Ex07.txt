@@ -1,0 +1,29 @@
+Phần 1: Phân tích lỗi
+
+Lỗi nằm ở tham số `-CaseSensitive`. Trong script, từ khóa tìm kiếm là "critical" viết thường, nhưng trong file server.log lại ghi "CRITICAL" viết hoa nên không tìm thấy dòng nào. Vì vậy, file daily_critical.txt không có nội dung lỗi và số dòng đếm được là 2.
+
+Phần 2: Sửa lỗi
+
+# Script: deploy_checker.ps1
+
+"=== Bat dau quet log: $(Get-Date) ===" | Out-File daily_critical.txt
+
+$Errors = Select-String -Path server.log -Pattern "CRITICAL"
+
+$Errors | Out-File -Append daily_critical.txt
+
+"=== Hoan tat. So dong loi: ===" | Out-File -Append daily_critical.txt
+
+$Errors.Count | Out-File -Append daily_critical.txt
+
+Kết quả sau khi chạy:
+
+=== Bat dau quet log: [Thời gian chạy script] ===
+2026-09-18 02:30:11 CRITICAL Database connection pool exhausted
+2026-09-18 02:30:45 CRITICAL Retry limit exceeded for payment-service
+=== Hoan tat. So dong loi: ===
+2
+
+Phần 3: Nếu file server.log không tồn tại
+
+PowerShell sẽ báo lỗi không tìm thấy file server.log. Các lệnh phía sau vẫn có thể tiếp tục chạy, nên cần kiểm tra file trước khi thực hiện script.
